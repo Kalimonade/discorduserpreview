@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discord Profile Preview with Nitro Gradient Background</title>
+<style>
+  body {
+    margin: 0;
+    background: #1e1f22;
+    color: white;
+    font-family: "gg sans", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    min-height: 100vh;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .container {
+    display: flex;
+    gap: 30px;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .inputs {
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .inputs input,
+  .inputs textarea,
+  .inputs label {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .inputs input[type="text"],
+  .inputs input[type="date"],
+  .inputs textarea,
+  .inputs input[type="color"] {
+    padding: 8px;
+    background: #1e1f22;
+    border: 1px solid #4e5058;
+    color: white;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  .inputs label {
+    font-size: 13px;
+    color: #b5bac1;
+    margin-bottom: 3px;
+  }
+
+  .divider {
+    width: 1px;
+    background-color: #444;
+  }
+
+  .preview {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  #profile-wrapper {
+    border-radius: 16px;
+  }
+
+  .profile-card {
+    width: 420px;
+    border-radius: 13px;
+    background: #36393f;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+    border: none;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  }
+
+  .profile-card.nitro-enabled {
+    border-style: solid;
+  }
+
+  .banner {
+    height: 120px;
+    background-color: #5865f2;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .avatar {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    width: 80px;
+    height: 80px;
+    border: 6px solid #36393f;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: #2b2d31;
+  }
+
+  .info {
+    padding: 60px 20px 20px 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .display-name {
+    font-size: 20px;
+    font-weight: bold;
+    transition: color 0.5s ease;
+    color: white;
+  }
+
+  .user-pronouns {
+    margin-top: 4px;
+    font-size: 14px;
+    color: #b5bac1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .separator {
+    user-select: none;
+    color: #6e7075;
+  }
+
+  .pronouns {
+    font-size: 14px;
+    color: #b5bac1;
+  }
+
+  .bio {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #dbdee1;
+    flex-grow: 1;
+    white-space: pre-wrap;
+  }
+
+  .join-date {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #b5bac1;
+    line-height: 1.2;
+  }
+
+  .join-date span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    background-color: #5865f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 14px;
+    color: #80848e;
+    font-family: "gg sans", sans-serif;
+  }
+
+  footer a {
+    color: #5865f2;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  .nitro-settings {
+    margin-top: 10px;
+    display: none;
+    gap: 12px;
+  }
+
+  .nitro-settings label {
+    width: auto;
+    margin-bottom: 6px;
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
+  }
+
+  .toggle-container label {
+    user-select: none;
+  }
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="inputs">
+    <label>Display Name</label>
+    <input type="text" oninput="updateText('displayName', this.value)" placeholder="Display Name" />
+
+    <label>Username</label>
+    <input type="text" oninput="updateText('username', this.value)" placeholder="username" />
+
+    <label>Pronouns</label>
+    <input type="text" oninput="updateText('pronouns', this.value)" placeholder="e.g. they/them" />
+
+    <label>Bio</label>
+    <textarea rows="3" oninput="updateMarkdownBio(this.value)" placeholder="This is a cool bio..."></textarea>
+
+    <label>Join Date</label>
+    <input type="date" oninput="updateJoinDate(this.value)" />
+
+    <div class="toggle-container">
+      <input type="checkbox" id="enableNitro" onchange="toggleNitro()" />
+      <label for="enableNitro">Enable Nitro</label>
+    </div>
+
+    <div class="nitro-settings" id="nitroSettings">
+      <label for="primaryColor">Primary Color</label>
+      <input type="color" id="primaryColor" value="#5865f2" onchange="updateNitroGradient()" />
+
+      <label for="accentColor">Accent Color</label>
+      <input type="color" id="accentColor" value="#36393f" onchange="updateNitroGradient()" />
+    </div>
+
+    <label>Upload Avatar</label>
+    <input type="file" accept="image/*" onchange="uploadImage(event, 'avatar')" />
+
+    <label>Upload Banner</label>
+    <input type="file" accept="image/*" onchange="uploadImage(event, 'banner')" />
+
+    <button onclick="takeScreenshot()">📸 Take Screenshot</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="preview">
+    <div id="profile-wrapper">
+      <div class="profile-card" id="profile">
+        <div class="banner" id="banner"></div>
+        <div class="avatar" id="avatar" style="background-image: url('https://cdn.discordapp.com/embed/avatars/0.png');"></div>
+        <div class="info">
+          <div class="display-name" id="displayName">Display Name</div>
+          <div class="user-pronouns">
+            <span class="username" id="username">username</span>
+            <span class="separator">·</span>
+            <span class="pronouns" id="pronouns">they/them</span>
+          </div>
+          <div class="bio" id="bio">This is a custom bio that shows up here. 🔥</div>
+          <div class="join-date" id="joinDate">
+            <span>Join Date</span>
+            <span>Not set</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Made with love by <a href="https://github.com/Kalimonade" target="_blank" rel="noopener noreferrer">Kalimonade</a>
+</footer>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+  function updateText(id, value) {
+    if (!value) {
+      if (id === 'username') value = 'username';
+      else if (id === 'pronouns') value = 'they/them';
+      else if (id === 'displayName') value = 'Display Name';
+    }
+    document.getElementById(id).textContent = value;
+  }
+
+  function updateJoinDate(value) {
+    const joinDateElem = document.getElementById('joinDate');
+    const dateText = value ? new Date(value).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }) : 'Not set';
+
+    joinDateElem.children[1].textContent = dateText;
+  }
+
+  // Simple markdown parser for bold and italics (basic)
+  function parseMarkdown(text) {
+    if(!text) return '';
+    let html = text
+      .replace(/</g, "&lt;").replace(/>/g, "&gt;") // escape tags
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") // bold
+      .replace(/\*(.+?)\*/g, "<em>$1</em>") // italics
+      .replace(/\n/g, "<br>"); // new lines
+    return html;
+  }
+
+  function updateMarkdownBio(value) {
+    const bioElem = document.getElementById('bio');
+    if (!value) value = "This is a custom bio that shows up here. 🔥";
+    bioElem.innerHTML = parseMarkdown(value);
+  }
+
+  function uploadImage(event, target) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+      setTimeout(() => {
+        if(target === 'banner') {
+          document.getElementById(target).style.backgroundImage = `url(${e.target.result})`;
+          document.getElementById(target).style.backgroundSize = 'cover';
+          document.getElementById(target).style.backgroundPosition = 'center';
+        } else {
+          document.getElementById(target).style.backgroundImage = `url(${e.target.result})`;
+        }
+      }, 500);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function takeScreenshot() {
+    html2canvas(document.querySelector("#profile-wrapper")).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'discord-profile-preview.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  }
+
+  function darkenHex(hex, percent) {
+    hex = hex.replace(/^#/, '');
+    let r = parseInt(hex.substring(0,2), 16);
+    let g = parseInt(hex.substring(2,4), 16);
+    let b = parseInt(hex.substring(4,6), 16);
+
+    r = Math.floor(r * (1 - percent/100));
+    g = Math.floor(g * (1 - percent/100));
+    b = Math.floor(b * (1 - percent/100));
+
+    r = (r < 0) ? 0 : r;
+    g = (g < 0) ? 0 : g;
+    b = (b < 0) ? 0 : b;
+
+    return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+
+  function isLightColor(hex) {
+    hex = hex.replace(/^#/, '');
+    let r = parseInt(hex.substring(0,2), 16);
+    let g = parseInt(hex.substring(2,4), 16);
+    let b = parseInt(hex.substring(4,6), 16);
+    // Perceived luminance
+    let luminance = 0.299*r + 0.587*g + 0.114*b;
+    return luminance > 200; // threshold for "too light"
+  }
+
+  function averageHexColor(c1, c2) {
+    c1 = c1.replace(/^#/, '');
+    c2 = c2.replace(/^#/, '');
+    let r = Math.floor((parseInt(c1.substring(0,2),16) + parseInt(c2.substring(0,2),16))/2);
+    let g = Math.floor((parseInt(c1.substring(2,4),16) + parseInt(c2.substring(2,4),16))/2);
+    let b = Math.floor((parseInt(c1.substring(4,6),16) + parseInt(c2.substring(4,6),16))/2);
+    return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+
+  function updateNitroGradient() {
+    const primary = document.getElementById('primaryColor').value;
+    const accent = document.getElementById('accentColor').value;
+    const profileCard = document.getElementById('profile');
+
+    // Apply gradient background to profile card
+    const gradient = `linear-gradient(to bottom, ${primary}, ${accent})`;
+    profileCard.style.background = gradient;
+
+    // Compute border color 25% darker than average of primary and accent colors
+    const avgColor = averageHexColor(primary, accent);
+    const borderColor = darkenHex(avgColor, 25);
+
+    profileCard.style.border = `3px solid ${borderColor}`;
+    profileCard.classList.add('nitro-enabled');
+
+    // If gradient too light, set displayName text to black, else white
+    if (isLightColor(primary) || isLightColor(accent)) {
+      document.getElementById('displayName').style.color = '#000000';
+    } else {
+      document.getElementById('displayName').style.color = '#ffffff';
+    }
+  }
+
+  function toggleNitro() {
+    const enabled = document.getElementById('enableNitro').checked;
+    const nitroSettings = document.getElementById('nitroSettings');
+    const profileCard = document.getElementById('profile');
+    const pronounsElem = document.getElementById('pronouns');
+
+    if (enabled) {
+      nitroSettings.style.display = 'flex';
+      nitroSettings.style.flexDirection = 'column';
+      updateNitroGradient();
+
+      // Add Nitro badge icon if not already present
+      if (!document.getElementById('nitroBadge')) {
+        const nitroIcon = document.createElement('img');
+        nitroIcon.id = 'nitroBadge';
+        nitroIcon.src = 'https://img.icons8.com/fluent/512/discord-nitro-badge.png';
+        nitroIcon.alt = 'Nitro Badge';
+        nitroIcon.style.width = '18px';
+        nitroIcon.style.height = '18px';
+        nitroIcon.style.marginLeft = '8px';
+        nitroIcon.style.verticalAlign = 'middle';
+        pronounsElem.parentNode.appendChild(nitroIcon);
+      }
+    } else {
+      nitroSettings.style.display = 'none';
+      profileCard.style.background = '#36393f';
+      profileCard.style.border = 'none';
+      profileCard.classList.remove('nitro-enabled');
+      document.getElementById('displayName').style.color = '#ffffff';
+
+      // Remove Nitro badge icon if present
+      const nitroIcon = document.getElementById('nitroBadge');
+      if (nitroIcon) {
+        nitroIcon.remove();
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
